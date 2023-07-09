@@ -1,4 +1,4 @@
-black=23.3.0
+black==23.3.0
 mypy==1.4.1
 openapi-spec-validator==0.5.7
 prance==23.6.21.0
