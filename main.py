@@ -6,30 +6,20 @@ from dataclasses import dataclass
 from typing import Iterator, Any, Union, List, Optional, Tuple
 from urllib.parse import urlencode
 
+import click
 from prance import ResolvingParser
 
 logger = logging.getLogger(__name__)
 
 COMMAND_PREFIX = "python3 ./sqlmap-dev/sqlmap.py"
+DEFAULT_RESULTS_FILE = "./results.txt"
 
 # TODO allow a user to set these values
-# Petstore
-SCHEME = "https"
-AUTHORITY = "petstore.openapi.io"
-SPEC_URL = "https://petstore3.swagger.io/api/v3/openapi.json"
-RESULTS_FILE = "./results-petstore.txt"
-
-TOKEN = ""
 DEFAULT_HEADERS = {"Accept": "application/json"}
-if TOKEN:
-    DEFAULT_HEADERS["Authorization"] = TOKEN
-
 LEVEL = 1
 RISK = 1
 DBMS = "postgres"
 TIME_SEC = 1
-
-DRY_RUN = True
 
 
 def insert_path_parameters_for_tampering(
@@ -360,8 +350,7 @@ def crawl_openapi(root_openapi: dict) -> Iterator[Task]:
 
 
 def execute_sqlmap(
-    scheme: str,
-    authority: str,
+    base_url: str,
     method: str,
     path: str,
     query: str,
@@ -372,13 +361,14 @@ def execute_sqlmap(
     dbms: Optional[str] = None,
     time_sec: Optional[int] = None,
     results_file: Optional[str] = None,
+    dry_run: bool = False,
 ):
     """
     Executes sqlmap on a given request.
     """
 
     command = f"{COMMAND_PREFIX} --batch"
-    url = scheme + "://" + authority + path + ("?" + query if query else "")
+    url = base_url + path + ("?" + query if query else "")
     command += f' --method={method} --url="{url}"'
     if level:
         command += f" --level={level}"
@@ -395,7 +385,7 @@ def execute_sqlmap(
     if headers:
         for key, value in headers.items():
             command += f' -H "{key}: {value}"'
-    if DRY_RUN:
+    if dry_run:
         print(command)
     else:
         os.system(command)
@@ -413,11 +403,11 @@ def merge_results(results_filepath: str, batch_results_filepath: str, is_temp: b
             results_file.write(batch_file.read())
 
 
-def main():
-    with open(RESULTS_FILE, "w") as f:
+def main(url: str, openapi_url: str, results_file: str, dry_run: bool):
+    with open(results_file, "w") as f:
         f.write("Target URL,Place,Parameter,Technique(s),Note(s)\n")
 
-    parser = ResolvingParser(SPEC_URL)
+    parser = ResolvingParser(openapi_url)
     if not parser.valid:
         raise Exception("Invalid OpenAPI specification")
 
@@ -425,8 +415,7 @@ def main():
     for task in tasks:
         with tempfile.NamedTemporaryFile(suffix=".txt") as f:
             execute_sqlmap(
-                scheme=SCHEME,
-                authority=AUTHORITY,
+                base_url=url,
                 method=task.method,
                 path=task.path,
                 query=task.query,
@@ -437,9 +426,31 @@ def main():
                 dbms=DBMS,
                 time_sec=TIME_SEC,
                 results_file=f.name,
+                dry_run=dry_run,
             )
-            merge_results(RESULTS_FILE, f.name, True)
+            merge_results(results_file, f.name, True)
+
+
+@click.command()
+@click.option("--url", type=str, help="Base URL to target", required=True)
+@click.option(
+    "--openapi", type=str, help="URL to the OpenAPI specification file", required=True
+)
+@click.option(
+    "--results-file",
+    type=str,
+    help="File to write results to",
+    default=DEFAULT_RESULTS_FILE,
+)
+@click.option(
+    "--dry-run",
+    type=bool,
+    flag_value=True,
+    help="Print commands instead of executing them",
+)
+def command(url, openapi, results_file, dry_run):
+    main(url, openapi, results_file, dry_run)
 
 
 if __name__ == "__main__":
-    main()
+    command()

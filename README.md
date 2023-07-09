@@ -15,7 +15,7 @@ make install
 ```
 
 ```bash
-make run
+python3 main.py <args...>
 ```
 
 ## Example
@@ -24,7 +24,7 @@ Command:
 
 ```bash
 ```bash```
-make run
+python3 main.py --url https://petstore.openapi.io --openapi https://petstore3.swagger.io/api/v3/openapi.json --dry-run  
 ```
 
 Output (with `DRY_RUN=True`):
