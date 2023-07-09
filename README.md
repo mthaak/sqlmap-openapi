@@ -25,7 +25,6 @@ python3 main.py <args...>
 Command:
 
 ```bash
-```bash```
 python3 main.py --url https://petstore.openapi.io --openapi https://petstore3.swagger.io/api/v3/openapi.json --dry-run  
 ```
 
