@@ -4,7 +4,7 @@ This a project to show how an OpenAPI spec can be used to execute [sqlmap](https
 automatically against all endpoints of a target API. Parameters are replaced by wildcards which tell sqlmap where to
 inject SQL payloads to detect vulnerabilities.
 
-## Usage
+## Installation
 
 Developed for Python 3.10.
 
@@ -13,6 +13,8 @@ python3 -m venv venv
 source venv/bin/activate
 make install
 ```
+
+## Usage
 
 ```bash
 python3 main.py <args...>
