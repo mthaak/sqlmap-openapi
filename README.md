@@ -28,7 +28,7 @@ Command:
 python3 main.py --url https://petstore.openapi.io --openapi https://petstore3.swagger.io/api/v3/openapi.json --dry-run  
 ```
 
-Output (with `DRY_RUN=True`):
+Output:
 
 ```bash
 python3 ./sqlmap-dev/sqlmap.py --batch --method=put --url="https://petstore.openapi.io/pet" --level=1 --risk=1 --dbms=postgres --time-sec=1 --results-file="/tmp/tmp4495_ndf.txt" --data "{\"id\": 0, \"name\": \"*\", \"category\": {\"id\": 0, \"name\": \"123\"}, \"photoUrls\": [\"123\"], \"tags\": [{\"id\": 0, \"name\": \"123\"}], \"status\": \"123\"}" -H "Accept: application/json"
