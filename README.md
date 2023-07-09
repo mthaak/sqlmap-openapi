@@ -6,6 +6,9 @@ inject SQL payloads to detect vulnerabilities.
 
 
 ## Usage
+
+Developed for Python 3.10.
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
